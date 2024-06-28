@@ -33,14 +33,10 @@ class VideoPlayer:
         # Crear estilo global para el modo oscuro
         self.create_dark_theme()
         
-        # Crear estilo global para el modo azul
-        self.create_blue_theme()
-
-
         # Crear UI con tkinter
         self.root = root
         self.root.title("Reproductor de video - VLC Night")
-        root.geometry("800x700+290+10")
+        root.geometry("1024x720+290+10")
         
         try:
             image_icon = PhotoImage(file=icon_vlc)
@@ -48,38 +44,48 @@ class VideoPlayer:
         except tk.TclError as e:
             print(f"Error loading icon: {e}")
         
+        # Crear canvas para reproductor
+        
         self.frame = ttk.Frame(self.root, style='Dark.TFrame')
         self.frame.pack(fill=tk.BOTH, expand=True)
         
         self.canvas = tk.Canvas(self.frame, bg='black')  # Establecer fondo negro directamente
         self.canvas.pack(fill=tk.BOTH, expand=True)
         
+        # Establecer el reproductor en el canvas
+        
         self.player.set_hwnd(self.canvas.winfo_id())
         
-        #fondo del reproductor
+        # Fondo del reproductor
         
         self.controls_frame = ttk.Frame(self.root, style='Dark.TFrame')
         self.controls_frame.pack(fill=tk.X)
         
-        self.play_button = ttk.Button(self.controls_frame, text="Play", command=self.play_pause, style='Dark.TButton')
+        # Crear botones
+        
+        self.play_button = ttk.Button(self.controls_frame, text="Play", command=self.play_pause, style='LightBgBlueText.TButton')
         self.play_button.pack(side=tk.LEFT)
         
-        self.stop_button = ttk.Button(self.controls_frame, text="Stop", command=self.stop, style='Dark.TButton')
+        self.stop_button = ttk.Button(self.controls_frame, text="Stop", command=self.stop, style='LightBgBlueText.TButton')
         self.stop_button.pack(side=tk.LEFT)
         
-        self.backward_button = ttk.Button(self.controls_frame, text="<<", command=self.backward, style='Dark.TButton')
+        self.backward_button = ttk.Button(self.controls_frame, text="<<", command=self.backward, style='LightBgBlueText.TButton')
         self.backward_button.pack(side=tk.LEFT)
         
-        self.forward_button = ttk.Button(self.controls_frame, text=">>", command=self.forward, style='Dark.TButton')
+        self.forward_button = ttk.Button(self.controls_frame, text=">>", command=self.forward, style='LightBgBlueText.TButton')
         self.forward_button.pack(side=tk.LEFT)
         
-        self.speed_label = ttk.Label(self.controls_frame, text="Speed:", style='Dark.TLabel')
+        # Crear combobox de velocidad
+        
+        self.speed_label = ttk.Label(self.controls_frame, text="Speed: ", style='Dark.TLabel')
         self.speed_label.pack(side=tk.LEFT)
         
         self.speed_var = tk.StringVar(value="1.0")
-        self.speed_combo = ttk.Combobox(self.controls_frame, textvariable=self.speed_var, values=["0.25", "0.5", "1.0", "1.25", "1.5", "2.0"], state="readonly", width=3, style='Dark.TCombobox')
+        self.speed_combo = ttk.Combobox(self.controls_frame, textvariable=self.speed_var, values=[" 0.25", " 0.5", " 1.0", " 1.25", " 1.5", " 2.0"], state="readonly", width=3, style='LightBgBlueText.TButton')
         self.speed_combo.pack(side=tk.LEFT)
         self.speed_combo.bind("<<ComboboxSelected>>", self.set_speed)
+        
+        # Crear barra de tiempo
         
         self.time_label = ttk.Label(self.controls_frame, text="00:00 / 00:00", style='Dark.TLabel')
         self.time_label.pack(side=tk.LEFT)
@@ -94,6 +100,8 @@ class VideoPlayer:
         self.progress_frame = ttk.Frame(self.controls_frame, style='Dark.TFrame')
         self.progress_frame.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0,3))
         
+        # Crear barra de volumen
+        
         self.volume_var = tk.DoubleVar(value=100)
         self.volume_scale = ttk.Scale(self.controls_frame, from_=0, to=100, orient=tk.HORIZONTAL, variable=self.volume_var, command=self.set_volume, style='Dark.Horizontal.TScale')
         self.volume_scale.pack(side=tk.LEFT)
@@ -101,15 +109,19 @@ class VideoPlayer:
         self.volume_label = ttk.Label(self.controls_frame, text="Volume: 100%", style='Dark.TLabel')
         self.volume_label.pack(side=tk.LEFT)
         
-        self.fullscreen_button = ttk.Button(self.controls_frame, text="Fullscreen", command=self.toggle_fullscreen, style='Dark.TButton')
+        # Crear botones de pantalla completa y repetición
+        
+        self.fullscreen_button = ttk.Button(self.controls_frame, text="Fullscreen", command=self.toggle_fullscreen, style='LightBgBlueText.TButton')
         self.fullscreen_button.pack(side=tk.LEFT)
 
-        self.repeat_button = ttk.Button(self.controls_frame, text="Repeat Off", command=self.toggle_repeat, style='Dark.TButton')
+        self.repeat_button = ttk.Button(self.controls_frame, text="Repeat Off", command=self.toggle_repeat, style='LightBgBlueText.TButton')
         self.repeat_button.pack(side=tk.LEFT)
         
-        self.add_button = ttk.Button(self.controls_frame, text="Add Video", command=self.add_video, style='Dark.TButton')
+        self.add_button = ttk.Button(self.controls_frame, text="Add Video", command=self.add_video, style='LightBgBlueText.TButton')
         self.add_button.pack(side=tk.LEFT)
 
+        # Asociar eventos de teclado
+        
         self.root.bind("<space>", lambda event: self.play_pause())
         self.root.bind("<Left>", lambda event: self.backward())
         self.root.bind("<Right>", lambda event: self.forward())
@@ -118,18 +130,17 @@ class VideoPlayer:
         self.root.bind("<Escape>", lambda event: self.exit_fullscreen())  # Permitir salir de pantalla completa con 'Escape'
         self.canvas.bind("<Double-1>", lambda event: self.toggle_fullscreen())
         
+        # Mostrar controles
+        
         self.canvas.bind("<Motion>", self.show_controls)
         self.controls_visible = True
         self.controls_frame.bind("<Motion>", self.show_controls)
         
+        # Reproducir video
+        
         self.update_time()
         self.play_video()
 
-
-#    def create_blue_theme(self):
-#        """Crea un tema azul personalizado utilizando ttk.Style()."""
-#        style = ttk.Style()
-#        style.configure("BW.TLabel", foreground="blue", background="#0077FF")
     def create_dark_theme(self):
         """Crea un tema oscuro personalizado utilizando ttk.Style()."""
         style = ttk.Style()
@@ -139,6 +150,7 @@ class VideoPlayer:
         dark_fg = "white"
         light_bg = "#555555"
         light_fg = "black"
+        dark_blue_fg = "#00008B"  # Color azul oscuro para el texto
 
         # Configurar el estilo para diferentes componentes
         style.configure('Dark.TFrame', background=dark_bg)
@@ -149,6 +161,10 @@ class VideoPlayer:
         style.map('Dark.TCombobox', background=[('active', light_bg)])
         style.configure('Dark.Horizontal.TScale', background=dark_bg, troughcolor=light_bg)
         style.map('Dark.Horizontal.TScale', background=[('active', light_bg)])
+
+        # Estilo para los botones con texto azul oscuro y fondo claro
+        style.configure('LightBgBlueText.TButton', background=light_bg, foreground=dark_blue_fg, borderwidth=0)
+        style.map('LightBgBlueText.TButton', background=[('active', 'blue')])
 
     def play_video(self):
         if self.current_index < len(self.urls):
